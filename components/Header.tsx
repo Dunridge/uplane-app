@@ -1,10 +1,12 @@
 export default function Header() {
   return (
-    <header className="space-y-2 text-center">
-      <h1 className="text-3xl font-bold tracking-tight text-black">
-        Image Transformation
-      </h1>
-      <p className="text-gray-500">Remove background and flip horizontally</p>
+    <header
+      className="w-full flex items-center text-white py-6 px-6 gap-4"
+      style={{
+        background: "rgb(245, 245, 245)",
+      }}
+    >
+      <img src="/uplane-logo.svg" alt="Uplane Logo" />
     </header>
   );
 }

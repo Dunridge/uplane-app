@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import ProcessingState from "@/components/ProcessingState";
 import ResultCard from "@/components/ResultCard";
 import UploadCard from "@/components/UploadCard";
+import { deleteImage, uploadImage } from "@/lib/api";
 import { useState } from "react";
 
 type Status = "idle" | "processing" | "success";
@@ -13,48 +14,52 @@ export default function Home() {
   const [imageUrl, setImageUrl] = useState("");
   const [imageId, setImageId] = useState("");
 
-  // TODO: write the endpoints for doing the upload of the images
   const handleUpload = async (file: File) => {
     setStatus("processing");
 
-    const form = new FormData();
-    form.append("file", file);
+    try {
+      const data = await uploadImage(file);
 
-    const res = await fetch("/api/images", {
-      method: "POST",
-      body: form,
-    });
-
-    const data = await res.json();
-
-    setImageUrl(data.url);
-    setImageId(data.id);
-    setStatus("success");
+      setImageUrl(data.url);
+      setImageId(data.id);
+      setStatus("success");
+    } catch {
+      setStatus("idle");
+      alert("Upload failed");
+    }
   };
 
   const handleDelete = async () => {
-    await fetch(`/api/images/${imageId}`, {
-      method: "DELETE",
-    });
-
+    await deleteImage(imageId);
     setStatus("idle");
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center gap-8 bg-gray-50 p-8">
+    <main className="flex min-h-screen flex-col bg-[#F5F5F5]">
       <Header />
 
-      {status === "idle" && <UploadCard onUpload={handleUpload} />}
+      <div className="flex flex-col items-center justify-center flex-1 gap-6 px-4">
+        <div className="text-center max-w-lg w-full">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-2">
+            Image Transformation
+          </h1>
+          <p className="text-gray-500">
+            Remove background and flip horizontally
+          </p>
+        </div>
 
-      {status === "processing" && <ProcessingState />}
+        {status === "idle" && <UploadCard onUpload={handleUpload} />}
 
-      {status === "success" && (
-        <ResultCard
-          imageUrl={imageUrl}
-          onDelete={handleDelete}
-          onReset={() => setStatus("idle")}
-        />
-      )}
+        {status === "processing" && <ProcessingState />}
+
+        {status === "success" && (
+          <ResultCard
+            imageUrl={imageUrl}
+            onDelete={handleDelete}
+            onReset={() => setStatus("idle")}
+          />
+        )}
+      </div>
     </main>
   );
 }
