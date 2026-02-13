@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import Header from "@/components/Header";
-import UploadCard from "@/components/UploadCard";
 import ProcessingState from "@/components/ProcessingState";
 import ResultCard from "@/components/ResultCard";
-
-import { uploadImage, deleteImage } from "@/lib/api";
+import UploadCard from "@/components/UploadCard";
+import { deleteImage, uploadImage } from "@/lib/api";
+import { useState } from "react";
 
 type Status = "idle" | "processing" | "success";
 
@@ -36,30 +35,31 @@ export default function Home() {
   };
 
   return (
-    <main
-      className="flex min-h-screen flex-col items-center gap-8"
-      style={{ backgroundColor: "#F5F5F5" }}
-    >
+    <main className="flex min-h-screen flex-col bg-[#F5F5F5]">
       <Header />
 
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-black">
-          Image Transformation
-        </h1>
-        <p className="text-gray-500">Remove background and flip horizontally</p>
+      <div className="flex flex-col items-center justify-center flex-1 gap-6 px-4">
+        <div className="text-center max-w-lg w-full">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-black mb-2">
+            Image Transformation
+          </h1>
+          <p className="text-gray-500">
+            Remove background and flip horizontally
+          </p>
+        </div>
+
+        {status === "idle" && <UploadCard onUpload={handleUpload} />}
+
+        {status === "processing" && <ProcessingState />}
+
+        {status === "success" && (
+          <ResultCard
+            imageUrl={imageUrl}
+            onDelete={handleDelete}
+            onReset={() => setStatus("idle")}
+          />
+        )}
       </div>
-
-      {status === "idle" && <UploadCard onUpload={handleUpload} />}
-
-      {status === "processing" && <ProcessingState />}
-
-      {status === "success" && (
-        <ResultCard
-          imageUrl={imageUrl}
-          onDelete={handleDelete}
-          onReset={() => setStatus("idle")}
-        />
-      )}
     </main>
   );
 }
