@@ -139,3 +139,12 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 * Fully implement **DELETE endpoint** to remove hosted images
 * Add **error handling for unsupported file types**
 * Optimize performance for large images
+
+## Notes on Deployment
+
+The current implementation uses a Python script for image processing (background removal and horizontal flip). 
+To deploy the app on Vercel (or any Node.js-only hosting), this Python script would need to be replaced with:
+- A Node.js image processing library (e.g., Sharp)
+- Or an external API for background removal (e.g., Remove.bg or OpenAI Image Editing)
+
+All other functionality (uploading, deletion, frontend UI) works as-is and is fully compatible with deployment.
