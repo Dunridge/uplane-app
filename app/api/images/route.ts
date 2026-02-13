@@ -1,8 +1,54 @@
 import { NextResponse } from "next/server";
+import { execFile } from "child_process";
+import path from "path";
+import fs from "fs";
 
-export async function POST() {
-  return NextResponse.json({
-    id: "test-id",
-    url: "https://picsum.photos/400",
-  });
-}
+export const POST = async (req: Request) => {
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file") as File;
+
+    if (!file) throw new Error("No file uploaded");
+
+    const uploadedBuffer = Buffer.from(await file.arrayBuffer());
+
+    const uploadsDir = path.join(process.cwd(), "uploads");
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+
+    const timestamp = Date.now();
+    const inputPath = path.join(uploadsDir, `input-${timestamp}.png`);
+    const outputPath = path.join(uploadsDir, `output-${timestamp}.png`);
+
+    fs.writeFileSync(inputPath, uploadedBuffer);
+
+    const pythonScriptPath = path.join(
+      process.cwd(),
+      "scripts",
+      "process_image.py"
+    );
+    await new Promise<void>((resolve, reject) => {
+      execFile(
+        "/opt/anaconda3/bin/python",
+        [pythonScriptPath, inputPath, outputPath],
+        (err) => {
+          if (err) return reject(err);
+          resolve();
+        }
+      );
+    });
+
+    const processedBuffer = fs.readFileSync(outputPath);
+    const base64Image = processedBuffer.toString("base64");
+
+    fs.unlinkSync(inputPath);
+    fs.unlinkSync(outputPath);
+
+    return NextResponse.json({
+      id: `image-${timestamp}`,
+      url: `data:image/png;base64,${base64Image}`,
+    });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Processing failed" }, { status: 500 });
+  }
+};

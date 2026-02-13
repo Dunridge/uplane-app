@@ -13,6 +13,10 @@ type Props = {
 export default function ResultCard({ imageUrl, onDelete, onReset }: Props) {
   const [copied, setCopied] = useState(false);
 
+  if (imageUrl) {
+    console.log("imageUrl", imageUrl);
+  }
+
   const copy = async () => {
     await navigator.clipboard.writeText(imageUrl);
     setCopied(true);
