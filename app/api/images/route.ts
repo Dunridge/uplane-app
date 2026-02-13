@@ -15,10 +15,14 @@ export const POST = async (req: Request) => {
     const uploadsDir = path.join(process.cwd(), "uploads");
     if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
+    const resultsDir = path.join(process.cwd(), "results");
+    if (!fs.existsSync(resultsDir)) fs.mkdirSync(resultsDir);
+
     const timestamp = Date.now();
     const inputPath = path.join(uploadsDir, `input-${timestamp}.png`);
-    const outputPath = path.join(uploadsDir, `output-${timestamp}.png`);
+    const outputPath = path.join(resultsDir, `output-${timestamp}.png`);
 
+    // Save uploaded file
     fs.writeFileSync(inputPath, uploadedBuffer);
 
     const pythonScriptPath = path.join(
@@ -26,9 +30,10 @@ export const POST = async (req: Request) => {
       "scripts",
       "process_image.py"
     );
+
     await new Promise<void>((resolve, reject) => {
       execFile(
-        "/opt/anaconda3/bin/python",
+        "/opt/anaconda3/bin/python", // path to your Conda Python
         [pythonScriptPath, inputPath, outputPath],
         (err) => {
           if (err) return reject(err);
@@ -41,7 +46,6 @@ export const POST = async (req: Request) => {
     const base64Image = processedBuffer.toString("base64");
 
     fs.unlinkSync(inputPath);
-    fs.unlinkSync(outputPath);
 
     return NextResponse.json({
       id: `image-${timestamp}`,

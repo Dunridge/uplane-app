@@ -36,7 +36,7 @@ export default function ResultCard({ imageUrl, onDelete, onReset }: Props) {
           value={imageUrl}
           className="flex-1 rounded-lg border px-3 py-2 text-xs"
         />
-        <Button variant="secondary" onClick={copy}>
+        <Button variant="primary" onClick={copy}>
           Copy
         </Button>
       </div>
