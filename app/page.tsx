@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Header from "@/components/Header";
+import UploadCard from "@/components/UploadCard";
 import ProcessingState from "@/components/ProcessingState";
 import ResultCard from "@/components/ResultCard";
-import UploadCard from "@/components/UploadCard";
-import { useState } from "react";
+
+import { uploadImage, deleteImage } from "@/lib/api";
 
 type Status = "idle" | "processing" | "success";
 
@@ -13,30 +15,23 @@ export default function Home() {
   const [imageUrl, setImageUrl] = useState("");
   const [imageId, setImageId] = useState("");
 
-  // TODO: write the endpoints for doing the upload of the images
   const handleUpload = async (file: File) => {
     setStatus("processing");
 
-    const form = new FormData();
-    form.append("file", file);
+    try {
+      const data = await uploadImage(file);
 
-    const res = await fetch("/api/images", {
-      method: "POST",
-      body: form,
-    });
-
-    const data = await res.json();
-
-    setImageUrl(data.url);
-    setImageId(data.id);
-    setStatus("success");
+      setImageUrl(data.url);
+      setImageId(data.id);
+      setStatus("success");
+    } catch {
+      setStatus("idle");
+      alert("Upload failed");
+    }
   };
 
   const handleDelete = async () => {
-    await fetch(`/api/images/${imageId}`, {
-      method: "DELETE",
-    });
-
+    await deleteImage(imageId);
     setStatus("idle");
   };
 
